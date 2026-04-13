@@ -13,6 +13,7 @@ enum List[A]:
   def tail: Option[List[A]] = this match
     case h :: t => Some(t)
     case _ => None
+
   def foreach(consumer: A => Unit): Unit = this match
     case h :: t => consumer(h); t.foreach(consumer)
     case _ =>
@@ -47,7 +48,7 @@ enum List[A]:
   // Exercise: implement the following methods
   def zipWithValue[B](value: B): List[(A, B)] = ???
   def length(): Int = ???
-  def indices(): List[A] = ???
+  def indices(): List[Int] = ???
   def zipWithIndex: List[(A, Int)] = ???
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
@@ -56,6 +57,16 @@ enum List[A]:
 // Factories
 object List:
 
+  def unzip[A, B](list: List[(A, B)]): (List[A], List[B]) = list match
+    case (left, right) :: rest =>
+      val (leftList, rightList) = unzip(rest)
+      (left :: leftList, right :: rightList)
+    case Nil() => (Nil(), Nil())
+
+  def unzipWithFold[A, B](list: List[(A, B)]): (List[A], List[B]) =
+    list.foldRight((Nil(), Nil())) {
+      case ((left, right), (leftList, rightList)) => (left :: leftList, right :: rightList)
+    }
   def apply[A](elems: A*): List[A] =
     var list: List[A] = Nil()
     for e <- elems.reverse do list = e :: list
@@ -67,6 +78,8 @@ object List:
 object Test extends App:
   import List.*
   val reference = List(1, 2, 3, 4)
+  println(unzip(List((1, 2), (4, 3), (10, 20)))) //
+  println(unzipWithFold(List((1, 2), (4, 3), (10, 20)))) //
   println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.length()) // 4
   println(reference.indices()) // List(0, 1, 2, 3)
