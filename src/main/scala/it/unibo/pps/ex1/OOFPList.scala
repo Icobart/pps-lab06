@@ -57,7 +57,14 @@ enum List[A]:
     foldRight((length() - 1, Nil(): List[(A, Int)])) {
       case (elem, (currentIndex, listAcc)) => (currentIndex - 1, (elem, currentIndex) :: listAcc)
     }._2
-  def partition(predicate: A => Boolean): (List[A], List[A]) = ???
+  def partition(predicate: A => Boolean): (List[A], List[A]) = this match
+    case h :: t if predicate(h) =>
+      val (pass, fail) = t.partition(predicate)
+      (h :: pass, fail)
+    case h :: t =>
+      val (pass, fail) = t.partition(predicate)
+      (pass, h :: fail)
+    case _ => (Nil(), Nil())
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
