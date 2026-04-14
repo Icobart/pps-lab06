@@ -86,7 +86,7 @@ enum List[A]:
       case rest => rest
     _takeRight(this, elementsToDiscard)
     */
-  /* O(n^2) solution
+  /*
   def takeRight(n: Int): List[A] = this match
     case _ if length() <= n => this
     case _ :: t => t.takeRight(n)
@@ -100,7 +100,11 @@ enum List[A]:
         else
           (acc, listAcc)
     }._2
-  def collect(predicate: PartialFunction[A, A]): List[A] = ???
+  def collect(predicate: PartialFunction[A, A]): List[A] = this match
+    case h :: t if predicate.isDefinedAt(h) =>
+      predicate(h) :: t.collect(predicate)
+    case _ :: t => t.collect(predicate)
+    case _ => Nil()
 // Factories
 object List:
 
