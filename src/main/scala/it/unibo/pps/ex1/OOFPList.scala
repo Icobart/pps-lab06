@@ -72,11 +72,23 @@ enum List[A]:
       (pass, h :: fail)
     case _ => (Nil(), Nil())
 
+  /*
   def span(predicate: A => Boolean): (List[A], List[A]) = this match
     case h :: t if predicate(h) =>
       val (first, second) = t.span(predicate)
       (h :: first, second)
     case _ => (Nil(), this)
+  */
+  def span(predicate: A => Boolean): (List[A], List[A]) =
+    val (firstSpan, secondSpan, _) = foldLeft((Nil(): List[A], Nil(): List[A], false)) {
+      case ((first, second, hasFailed), elem) =>
+        if !hasFailed && predicate(elem) then
+          (elem :: first, second, false)
+        else
+          (first, elem :: second, true)
+    }
+    (firstSpan.foldLeft(Nil())((acc, elem) => elem :: acc), secondSpan.foldLeft(Nil())((acc, elem) => elem :: acc))
+
   /*
   def takeRight(n: Int): List[A] =
     val elementsToDiscard = this.length() - n
@@ -100,6 +112,7 @@ enum List[A]:
         else
           (acc, listAcc)
     }._2
+
   /*
   def collect(predicate: PartialFunction[A, A]): List[A] = this match
     case h :: t if predicate.isDefinedAt(h) =>
