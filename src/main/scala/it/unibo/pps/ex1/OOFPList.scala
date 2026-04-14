@@ -63,6 +63,7 @@ enum List[A]:
       case (elem, (currentIndex, listAcc)) => (currentIndex - 1, (elem, currentIndex) :: listAcc)
     }._2
 
+  /*
   def partition(predicate: A => Boolean): (List[A], List[A]) = this match
     case h :: t if predicate(h) =>
       val (pass, fail) = t.partition(predicate)
@@ -71,6 +72,15 @@ enum List[A]:
       val (pass, fail) = t.partition(predicate)
       (pass, h :: fail)
     case _ => (Nil(), Nil())
+  */
+  def partition(predicate: A => Boolean): (List[A], List[A]) =
+    foldRight((Nil(): List[A], Nil(): List[A])) {
+      case (elem, (pass, fail)) =>
+        if predicate(elem) then
+          (elem :: pass, fail)
+        else
+          (pass, elem :: fail)
+    }
 
   /*
   def span(predicate: A => Boolean): (List[A], List[A]) = this match
