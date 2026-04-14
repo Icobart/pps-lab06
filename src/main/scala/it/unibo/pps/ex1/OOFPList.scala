@@ -58,10 +58,18 @@ enum List[A]:
     }
     listIndices._1.foldLeft(Nil())((acc, elem) => elem :: acc)
 
+  /*
   def zipWithIndex: List[(A, Int)] =
     foldRight((length() - 1, Nil(): List[(A, Int)])) {
       case (elem, (currentIndex, listAcc)) => (currentIndex - 1, (elem, currentIndex) :: listAcc)
     }._2
+  */
+  def zipWithIndex: List[(A, Int)] =
+    val startIndex = 0
+    def _zipWithIndex(currentList: List[A], index: Int): List[(A, Int)] = currentList match
+      case h :: t => (h, index) :: _zipWithIndex(t, index + 1)
+      case _ => Nil()
+    _zipWithIndex(this, startIndex)
 
   /*
   def partition(predicate: A => Boolean): (List[A], List[A]) = this match
