@@ -6,6 +6,8 @@ enum Question:
 trait ConferenceReviewing:
   def loadReview(article: Int, relevanceScore: Int, significanceScore: Int, confidenceScore: Int, finalScore: Int): Unit
   def loadReview(article: Int, scores: Map[Question, Int]): Unit
+  def orderedScores(article: Int, question: Question): List[Int]
+  def averageFinalScore(article: Int): Double
 
 class ConferenceReviewingImpl extends ConferenceReviewing:
 
@@ -23,6 +25,12 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
     val newReviews = scores :: oldReviews
     database += (article -> newReviews)
 
+  def orderedScores(article: Int, question: Question): List[Int] =
+    val reviews = database.getOrElse(article, List.empty)
+    reviews.flatMap(map => map.get(question)).sorted
+
+  def averageFinalScore(article: Int): Double = ???
+
 
 @main def conferenceReviewingImplTest(): Unit =
   val cr = ConferenceReviewingImpl()
@@ -34,7 +42,7 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   cr.loadReview(3, 4, 4, 4, 4)
   cr.loadReview(4, 6, 6, 6, 6)
   cr.loadReview(4, 7, 7, 8, 7)
-  val mapScore: Map[Question, Int] = Map(
+  val mapScore = Map(
     Question.Relevance -> 8,
     Question.Significance -> 8,
     Question.Confidence -> 7,
@@ -44,8 +52,13 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   cr.loadReview(5, 6, 6, 6, 10)
   cr.loadReview(5, 7, 7, 7, 10)
 
+  assert(cr.orderedScores(2, Question.Relevance) == List(4, 9), "Failed article 2 Relevance")
+  assert(cr.orderedScores(4, Question.Confidence) == List(6, 7, 8), "Failed article 4 Confidence")
+  assert(cr.orderedScores(5, Question.Final) == List(10, 10), "Failed article 5 Final")
 
-
-
-
+  assert(cr.averageFinalScore(1) - 8.5 <= 0.01)
+  assert(cr.averageFinalScore(2) - 7.5 <= 0.01)
+  assert(cr.averageFinalScore(3) - 3.5 <= 0.01)
+  assert(cr.averageFinalScore(4) - 7.0 <= 0.01)
+  assert(cr.averageFinalScore(5) - 10.0 <= 0.01)
 
