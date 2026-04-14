@@ -65,7 +65,11 @@ enum List[A]:
       val (pass, fail) = t.partition(predicate)
       (pass, h :: fail)
     case _ => (Nil(), Nil())
-  def span(predicate: A => Boolean): (List[A], List[A]) = ???
+  def span(predicate: A => Boolean): (List[A], List[A]) = this match
+    case h :: t if predicate(h) =>
+      val (first, second) = t.span(predicate)
+      (h :: first, second)
+    case _ => (Nil(), this)
   def takeRight(n: Int): List[A] = ???
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
