@@ -52,11 +52,19 @@ enum List[A]:
 
   def length(): Int = foldLeft(0)((acc, _) => acc + 1)
 
+  /*
   def indices(): List[Int] =
     val listIndices = foldLeft((Nil(): List[Int], 0)) {
       case ((listAcc, acc), _) => (acc :: listAcc, acc + 1)
     }
     listIndices._1.foldLeft(Nil())((acc, elem) => elem :: acc)
+  */
+  def indices(): List[Int] =
+    val startIndex = 0
+    def _indices(currentList: List[A], index: Int): List[Int] = currentList match
+      case _ :: t => index :: _indices(t, index + 1)
+      case _ => Nil()
+    _indices(this, startIndex)
 
   /*
   def zipWithIndex: List[(A, Int)] =
