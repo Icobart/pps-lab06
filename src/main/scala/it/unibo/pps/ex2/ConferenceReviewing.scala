@@ -29,9 +29,9 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
     val reviews = database.getOrElse(article, List.empty)
     reviews.flatMap(map => map.get(question)).sorted
 
-  def averageFinalScore(article: Int): Double =
-    val finalScores = orderedScores(article, Question.Final)
-    if finalScores.isEmpty then 0.0 else finalScores.sum.toDouble / finalScores.size
+  def averageFinalScore(article: Int): Double = orderedScores(article, Question.Final) match
+    case Nil => 0.0
+    case s => s.sum.toDouble / s.size
 
 
 @main def conferenceReviewingImplTest(): Unit =
