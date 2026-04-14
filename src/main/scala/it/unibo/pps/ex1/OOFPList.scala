@@ -100,11 +100,15 @@ enum List[A]:
         else
           (acc, listAcc)
     }._2
+  /*
   def collect(predicate: PartialFunction[A, A]): List[A] = this match
     case h :: t if predicate.isDefinedAt(h) =>
       predicate(h) :: t.collect(predicate)
     case _ :: t => t.collect(predicate)
     case _ => Nil()
+  */
+  def collect(predicate: PartialFunction[A, A]): List[A] =
+    flatMap(a => if predicate.isDefinedAt(a) then predicate(a) :: Nil() else Nil())
 // Factories
 object List:
 
