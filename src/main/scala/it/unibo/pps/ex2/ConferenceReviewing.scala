@@ -29,7 +29,9 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
     val reviews = database.getOrElse(article, List.empty)
     reviews.flatMap(map => map.get(question)).sorted
 
-  def averageFinalScore(article: Int): Double = ???
+  def averageFinalScore(article: Int): Double =
+    val finalScores = orderedScores(article, Question.Final)
+    if finalScores.isEmpty then 0.0 else finalScores.sum.toDouble / finalScores.size
 
 
 @main def conferenceReviewingImplTest(): Unit =
@@ -56,9 +58,9 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   assert(cr.orderedScores(4, Question.Confidence) == List(6, 7, 8), "Failed article 4 Confidence")
   assert(cr.orderedScores(5, Question.Final) == List(10, 10), "Failed article 5 Final")
 
-  assert(cr.averageFinalScore(1) - 8.5 <= 0.01)
-  assert(cr.averageFinalScore(2) - 7.5 <= 0.01)
-  assert(cr.averageFinalScore(3) - 3.5 <= 0.01)
-  assert(cr.averageFinalScore(4) - 7.0 <= 0.01)
-  assert(cr.averageFinalScore(5) - 10.0 <= 0.01)
+  assert(math.abs(cr.averageFinalScore(1) - 8.5) <= 0.01, "Failed 1")
+  assert(math.abs(cr.averageFinalScore(2) - 7.5) <= 0.01, "Failed 2")
+  assert(math.abs(cr.averageFinalScore(3) - 3.5) <= 0.01, "Failed 3")
+  assert(math.abs(cr.averageFinalScore(4) - 7.0) <= 0.01, "Failed 4")
+  assert(math.abs(cr.averageFinalScore(5) - 10.0) <= 0.01, "Failed 5")
 
