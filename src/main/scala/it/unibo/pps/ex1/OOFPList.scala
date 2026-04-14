@@ -50,7 +50,13 @@ enum List[A]:
   // Exercise: implement the following methods
   def zipWithValue[B](value: B): List[(A, B)] = map((_, value))
 
-  def length(): Int = foldLeft(0)((acc, _) => acc + 1)
+  //def length(): Int = foldLeft(0)((acc, _) => acc + 1)
+  def length(): Int =
+    @tailrec
+    def _length(currentList: List[A], acc: Int): Int = currentList match
+      case _ :: t => _length(t, acc + 1)
+      case _ => acc
+    _length(this, 0)
 
   /*
   def indices(): List[Int] =
@@ -59,12 +65,17 @@ enum List[A]:
     }
     listIndices._1.foldLeft(Nil())((acc, elem) => elem :: acc)
   */
+  /*
   def indices(): List[Int] =
     val startIndex = 0
     def _indices(currentList: List[A], index: Int): List[Int] = currentList match
       case _ :: t => index :: _indices(t, index + 1)
       case _ => Nil()
     _indices(this, startIndex)
+  */
+  def indices(): List[Int] = this.zipWithIndex.map {
+    case (_, index) => index
+  }
 
   /*
   def zipWithIndex: List[(A, Int)] =
