@@ -1,5 +1,7 @@
 package it.unibo.pps.ex1
 
+import scala.annotation.tailrec
+
 // List as a pure interface
 enum List[A]:
   case ::(h: A, t: List[A])
@@ -47,16 +49,20 @@ enum List[A]:
   
   // Exercise: implement the following methods
   def zipWithValue[B](value: B): List[(A, B)] = map((_, value))
+
   def length(): Int = foldLeft(0)((acc, _) => acc + 1)
+
   def indices(): List[Int] =
     val listIndices = foldLeft((Nil(): List[Int], 0)) {
       case ((listAcc, acc), _) => (acc :: listAcc, acc + 1)
     }
     listIndices._1.foldLeft(Nil())((acc, elem) => elem :: acc)
+
   def zipWithIndex: List[(A, Int)] =
     foldRight((length() - 1, Nil(): List[(A, Int)])) {
       case (elem, (currentIndex, listAcc)) => (currentIndex - 1, (elem, currentIndex) :: listAcc)
     }._2
+
   def partition(predicate: A => Boolean): (List[A], List[A]) = this match
     case h :: t if predicate(h) =>
       val (pass, fail) = t.partition(predicate)
@@ -65,12 +71,35 @@ enum List[A]:
       val (pass, fail) = t.partition(predicate)
       (pass, h :: fail)
     case _ => (Nil(), Nil())
+
   def span(predicate: A => Boolean): (List[A], List[A]) = this match
     case h :: t if predicate(h) =>
       val (first, second) = t.span(predicate)
       (h :: first, second)
     case _ => (Nil(), this)
-  def takeRight(n: Int): List[A] = ???
+  /*
+  def takeRight(n: Int): List[A] =
+    val elementsToDiscard = this.length() - n
+    @tailrec
+    def _takeRight(currentList: List[A], discard: Int): List[A] = currentList match
+      case _ :: t if discard > 0 => _takeRight(t, discard - 1)
+      case rest => rest
+    _takeRight(this, elementsToDiscard)
+    */
+  /* O(n^2) solution
+  def takeRight(n: Int): List[A] = this match
+    case _ if length() <= n => this
+    case _ :: t => t.takeRight(n)
+    case _ => Nil()
+   */
+  def takeRight(n: Int): List[A] =
+    foldRight((0, Nil(): List[A])) {
+      case (elem, (acc, listAcc)) =>
+        if acc < n then
+          (acc + 1, elem :: listAcc)
+        else
+          (acc, listAcc)
+    }._2
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
 object List:
