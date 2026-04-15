@@ -23,7 +23,28 @@ object PerformanceUtils:
 
 import PerformanceUtils.*
 
-def runBasicBenchmarks(): Unit =
+trait SequenceBuilder:
+  def name: String
+  def buildSequence(elements: Int): Seq[Int]
+
+object Builder:
+  class ImmutableListBuilder extends SequenceBuilder:
+    def name: String = "Immutable List"
+
+    def buildSequence(elements: Int): Seq[Int] =
+      var list: List[Int] = List()
+      for i <- 1 to elements do list = list :+ i
+      list
+
+  class MutableBufferBuilder extends SequenceBuilder:
+    def name: String = "Mutable ListBuffer"
+
+    def buildSequence(elements: Int): Seq[Int] =
+      val buf: ListBuffer[Int] = ListBuffer()
+      for i <- 1 to elements do buf += i
+      buf.toList
+
+def runBasicBenchmarks: Unit =
   val SIZE = 50000
   val INDEX_TO_READ = SIZE / 2
   val immListBench = (1 to SIZE).toList
@@ -62,6 +83,14 @@ def runBasicBenchmarks(): Unit =
   measure("ArrayBuffer append") {
     mutArrBufBench.clone() += 0
   }
+
+def runBuilderComparison: Unit =
+  val BUILD_SIZE = 20000
+  val builders = List(Builder.ImmutableListBuilder(), Builder.MutableBufferBuilder())
+  for builder <- builders do
+    measure(s"\nBuild with ${builder.name}") {
+      builder.buildSequence(BUILD_SIZE)
+    }
 
 @main def checkPerformance: Unit =
 
@@ -156,4 +185,6 @@ def runBasicBenchmarks(): Unit =
   val vec = (1 to 10000000).toVector
   assert(measure("list last")(lst.last) > measure("vec last")(vec.last))
 
-  runBasicBenchmarks()
+  runBasicBenchmarks
+
+  runBuilderComparison
