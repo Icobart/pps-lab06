@@ -9,6 +9,7 @@ trait ConferenceReviewing:
   def orderedScores(article: Int, question: Question): List[Int]
   def averageFinalScore(article: Int): Double
   def acceptedArticles: Set[Int]
+  def sortedAcceptedArticles: List[(Int, Double)]
 
 class ConferenceReviewingImpl extends ConferenceReviewing:
 
@@ -37,6 +38,9 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   def acceptedArticles: Set[Int] =
     database.keys.filter(article => averageFinalScore(article) > 5 &&
                                     orderedScores(article, Question.Relevance).exists(_ >= 8)).toSet
+
+  def sortedAcceptedArticles: List[(Int, Double)] =
+    acceptedArticles.map(article => (article, averageFinalScore(article))).toList.sortBy(_._2)
 
 
 @main def conferenceReviewingImplTest(): Unit =
@@ -71,3 +75,6 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
 
   val accepted = cr.acceptedArticles
   assert(accepted == Set(1, 2, 4), s"Failed acceptedArticles: expected Set(1, 2, 4), instead $accepted")
+
+  val sortedArticles = cr.sortedAcceptedArticles
+  assert(cr.sortedAcceptedArticles == List((4, 7.0), (2, 7.5), (1, 8.5)), s"Failed sortedAcceptedArticles: expected List((4, 7.0), (2, 7.5), (1, 8.5)), instead $sortedArticles")
