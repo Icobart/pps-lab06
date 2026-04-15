@@ -8,6 +8,7 @@ trait ConferenceReviewing:
   def loadReview(article: Int, scores: Map[Question, Int]): Unit
   def orderedScores(article: Int, question: Question): List[Int]
   def averageFinalScore(article: Int): Double
+  def acceptedArticles: Set[Int]
 
 class ConferenceReviewingImpl extends ConferenceReviewing:
 
@@ -32,6 +33,10 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   def averageFinalScore(article: Int): Double = orderedScores(article, Question.Final) match
     case Nil => 0.0
     case s => s.sum.toDouble / s.size
+
+  def acceptedArticles: Set[Int] =
+    database.keys.filter(article => averageFinalScore(article) > 5 &&
+                                    orderedScores(article, Question.Relevance).exists(_ >= 8)).toSet
 
 
 @main def conferenceReviewingImplTest(): Unit =
@@ -64,3 +69,5 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
   assert(math.abs(cr.averageFinalScore(4) - 7.0) <= 0.01, "Failed 4")
   assert(math.abs(cr.averageFinalScore(5) - 10.0) <= 0.01, "Failed 5")
 
+  val accepted = cr.acceptedArticles
+  assert(accepted == Set(1, 2, 4), s"Failed acceptedArticles: expected Set(1, 2, 4), instead $accepted")
