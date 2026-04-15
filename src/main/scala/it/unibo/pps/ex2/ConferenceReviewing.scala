@@ -10,6 +10,7 @@ trait ConferenceReviewing:
   def averageFinalScore(article: Int): Double
   def acceptedArticles: Set[Int]
   def sortedAcceptedArticles: List[(Int, Double)]
+  def averageWeightedFinalScoreMap: Map[Int, Double]
 
 class ConferenceReviewingImpl extends ConferenceReviewing:
 
@@ -28,8 +29,7 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
     database += (article -> newReviews)
 
   def orderedScores(article: Int, question: Question): List[Int] =
-    val reviews = database.getOrElse(article, List.empty)
-    reviews.flatMap(map => map.get(question)).sorted
+    database.getOrElse(article, List.empty).flatMap(map => map.get(question)).sorted
 
   def averageFinalScore(article: Int): Double = orderedScores(article, Question.Final) match
     case Nil => 0.0
@@ -41,6 +41,11 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
 
   def sortedAcceptedArticles: List[(Int, Double)] =
     acceptedArticles.map(article => (article, averageFinalScore(article))).toList.sortBy(_._2)
+
+  def averageWeightedFinalScoreMap: Map[Int, Double] =
+    database.map {
+      case (article, reviews) => (article, reviews.map(r => (r(Question.Confidence) * r(Question.Final)) / 10.0).sum / reviews.size)
+    }
 
 
 @main def conferenceReviewingImplTest(): Unit =
@@ -78,3 +83,11 @@ class ConferenceReviewingImpl extends ConferenceReviewing:
 
   val sortedArticles = cr.sortedAcceptedArticles
   assert(cr.sortedAcceptedArticles == List((4, 7.0), (2, 7.5), (1, 8.5)), s"Failed sortedAcceptedArticles: expected List((4, 7.0), (2, 7.5), (1, 8.5)), instead $sortedArticles")
+
+  val weightedMap = cr.averageWeightedFinalScoreMap
+  assert(math.abs(weightedMap(1) - 5.1) <= 0.01, s"Failed averageWeightedFinalScoreMap 1: weightedMap = $weightedMap")
+  assert(math.abs(weightedMap(2) - 7.5) <= 0.01, s"Failed averageWeightedFinalScoreMap 2: weightedMap = $weightedMap")
+  assert(math.abs(weightedMap(3) - 1.25) <= 0.01, s"Failed averageWeightedFinalScoreMap 3: weightedMap = $weightedMap")
+  assert(math.abs(weightedMap(4) - 14.8 / 3) <= 0.01, s"Failed averageWeightedFinalScoreMap 4: weightedMap = $weightedMap")
+  assert(math.abs(weightedMap(5) - 6.5) <= 0.01, s"Failed averageWeightedFinalScoreMap 5: weightedMap = $weightedMap")
+  assert(weightedMap.size == 5, s"Wrong map size: expected 5, instead ${weightedMap.size}")
