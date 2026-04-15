@@ -21,6 +21,48 @@ object PerformanceUtils:
 
   def measure[T](expr: => T): MeasurementResults[T] = measure("")(expr)
 
+import PerformanceUtils.*
+
+def runBasicBenchmarks(): Unit =
+  val SIZE = 50000
+  val INDEX_TO_READ = SIZE / 2
+  val immListBench = (1 to SIZE).toList
+  val immVecBench = (1 to SIZE).toVector
+  val mutArrBufBench = ArrayBuffer.from(1 to SIZE)
+
+  println("\nRead")
+  measure("List read") {
+    immListBench(INDEX_TO_READ)
+  }
+  measure("Vector read") {
+    immVecBench(INDEX_TO_READ)
+  }
+  measure("ArrayBuffer read") {
+    mutArrBufBench(INDEX_TO_READ)
+  }
+
+  println("\nPrepend")
+  measure("List prepend") {
+    0 :: immListBench
+  }
+  measure("Vector prepend") {
+    0 +: immVecBench
+  }
+  measure("ArrayBuffer prepend") {
+    0 +=: mutArrBufBench.clone()
+  }
+
+  println("\nAppend")
+  measure("List append") {
+    immListBench :+ 0
+  }
+  measure("Vector append") {
+    immVecBench :+ 0
+  }
+  measure("ArrayBuffer append") {
+    mutArrBufBench.clone() += 0
+  }
+
 @main def checkPerformance: Unit =
 
   /* Linear sequences: List, ListBuffer */
@@ -113,3 +155,5 @@ object PerformanceUtils:
   val lst = (1 to 10000000).toList
   val vec = (1 to 10000000).toVector
   assert(measure("list last")(lst.last) > measure("vec last")(vec.last))
+
+  runBasicBenchmarks()
